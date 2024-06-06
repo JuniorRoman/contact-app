@@ -1,25 +1,44 @@
-import logo from './logo.svg';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import ContactList from "./ContactList";
+import ContactForm from "./ContactForm";
 import './App.css';
 
-function App() {
+const App = () => {
+  const [contacts, setContacts] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    axios
+      .get("https://jsonplaceholder.typicode.com/users")
+      .then((response) => setContacts(response.data))
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
+
+  const addContact = (contact) => {
+    const newContact = { ...contact, id: Date.now() };
+    setContacts([...contacts, newContact]);
+    setShowForm(false);
+  };
+
+  const deleteContact = (id) => {
+    setContacts(contacts.filter((contact) => contact.id !== id));
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h1>Контактний додаток</h1>
+      <ContactList contacts={contacts} onDelete={deleteContact} />
+      {showForm ? (
+        <ContactForm
+          addContact={addContact}
+          onCancel={() => setShowForm(false)}
+        />
+      ) : (
+        <button onClick={() => setShowForm(true)}>Додати новий контакт</button>
+      )}
     </div>
   );
-}
+};
 
 export default App;
